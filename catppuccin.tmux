@@ -69,14 +69,14 @@ main() {
   local wt_enabled
   wt_enabled="$(get_tmux_option "@catppuccin_window_tabs_enabled" "off")"
   readonly wt_enabled
- 
-  local pill_theme_enabled
-  pill_theme_enabled="$(get_tmux_option "@catppuccin_pill_theme_enabled" "off")"
-  readonly pill_theme_enabled
-  
-  local powerline_theme_enabled
-  powerline_theme_enabled="$(get_tmux_option "@catppuccin_powerline_theme_enabled" "off")"
-  readonly powerline_theme_enabled
+
+  local right_separator
+  right_separator="$(get_tmux_option "@catppuccin_right_separator" "")"
+  readonly right_separator
+
+  local left_separator
+  left_separator="$(get_tmux_option "@catppuccin_left_separator" "")"
+  readonly left_separator
 
   local powerline_icons_theme_enabled
   powerline_icons_theme_enabled="$(get_tmux_option "@catppuccin_powerline_icons_theme_enabled" "off")"
@@ -133,13 +133,13 @@ main() {
   user_icon="$(get_tmux_option "@catppuccin_user_icon" "")"
   readonly user_icon
 
-  local host_icon
-  host_icon="$(get_tmux_option "@catppuccin_host_icon" "󰒋")"
-  readonly host_icon
+  local show_directory_in_window_status
+  #readonly show_directory_in_window_status="#[fg=$thm_bg,bg=$thm_blue] #I #[fg=$thm_fg,bg=$thm_gray] #{b:pane_current_path} "
+  readonly show_directory_in_window_status="#[fg=$thm_bg,bg=$thm_blue] #I #[fg=$thm_fg,bg=$thm_gray] #W "
 
-  local datetime_icon
-  datetime_icon="$(get_tmux_option "@catppuccin_datetime_icon" "")"
-  readonly datetime_icon
+  local show_directory_in_window_status_current
+  #readonly show_directory_in_window_status_current="#[fg=$thm_bg,bg=$thm_orange] #I #[fg=$thm_fg,bg=$thm_bg] #{b:pane_current_path} "
+  readonly show_directory_in_window_status_current="#[fg=colour232,bg=$thm_orange] #I #[fg=colour255,bg=colour237] #(echo '#{pane_current_path}' | rev | cut -d'/' -f-2 | rev) "
 
   # Source status line themes
   if [[ "${pill_theme_enabled}" == "off" ]] &&
@@ -149,9 +149,10 @@ main() {
     source "$PLUGIN_DIR/$DEFAULT_STATUS_LINE_FILE"
   fi
 
-  if [[ "${pill_theme_enabled}" == "on" ]]; then
-    source "$PLUGIN_DIR/$PILL_STATUS_LINE_FILE"
-  fi
+  local show_window_in_window_status_current
+  readonly show_window_in_window_status_current="#[fg=$thm_fg,bg=$thm_gray] #W #[fg=$thm_bg,bg=$thm_orange] #I#[fg=$thm_orange,bg=$thm_bg]$left_separator#[fg=$thm_fg,bg=$thm_bg,nobold,nounderscore,noitalics] "
+ #setw -g window-status-current-format "#[fg=colour232,bg=$thm_orange] #I #[fg=colour255,bg=colour237] #(echo '#{pane_current_path}' | rev | cut -d'/' -f-2 | rev) "
+
 
   if [[ "${powerline_theme_enabled}" == "on" ]]; then
     source "$PLUGIN_DIR/$POWERLINE_STATUS_LINE_FILE"
