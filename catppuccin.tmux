@@ -32,16 +32,41 @@ setw() {
 }
 
 main() {
-  local theme
-  theme="$(get_tmux_option "@catppuccin_flavour" "frappe")"
+  get-tmux-option() {
+    local option value default
+    option="$1"
+    default="$2"
+    value="$(tmux show-option -gqv "$option")"
 
-  # Aggregate all commands in one array
-  local tmux_commands=()
+    if [ -n "$value" ]; then
+      echo "$value"
+    else
+      echo "$default"
+    fi
+  }
+
+  set() {
+    local option=$1
+    local value=$2
+    tmux set-option -gq "$option" "$value"
+  }
+
+  setw() {
+    local option=$1
+    local value=$2
+    tmux set-window-option -gq "$option" "$value"
+  }
+
+  local theme
+  theme="$(get-tmux-option "@catppuccin_flavour" "mocha")"
 
   # NOTE: Pulling in the selected theme by the theme that's being set as local
   # variables.
-  # shellcheck source=catppuccin-frappe.tmuxtheme
-  source /dev/stdin <<<"$(sed -e "/^[^#].*=/s/^/local /" "${PLUGIN_DIR}/catppuccin-${theme}.tmuxtheme")"
+  sed -E 's/^(.+=)/local \1/' \
+      > "${PLUGIN_DIR}/catppuccin-selected-theme.tmuxtheme" \
+      < "${PLUGIN_DIR}/catppuccin-${theme}.tmuxtheme"
+
+  source "${PLUGIN_DIR}/catppuccin-selected-theme.tmuxtheme"
 
   # status
   set status "on"
@@ -66,8 +91,7 @@ main() {
   # --------=== Statusline
 
   # NOTE: Checking for the value of @catppuccin_window_tabs_enabled
-  local wt_enabled
-  wt_enabled="$(get_tmux_option "@catppuccin_window_tabs_enabled" "off")"
+  wt_enabled="$(get-tmux-option "@catppuccin_window_tabs_enabled" "off")"
   readonly wt_enabled
 
   local right_separator
@@ -178,7 +202,8 @@ main() {
 
   # NOTE: With the @catppuccin_window_tabs_enabled set to on, we're going to
   # update the right_column1 and the window_status_* variables.
-  if [[ "${wt_enabled}" == "on" ]]; then
+  if [[ "${wt_enabled}" == "on" ]]
+  then
     right_column1=$show_directory
     window_status_format=$show_window_in_window_status
     window_status_current_format=$show_window_in_window_status_current
@@ -206,8 +231,6 @@ main() {
   #
   setw clock-mode-colour "${thm_blue}"
   setw mode-style "fg=${thm_pink} bg=${thm_black4} bold"
-
-  tmux "${tmux_commands[@]}"
 }
 
 main "$@"
